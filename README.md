@@ -1,36 +1,308 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Enhanced Next.js Application
 
-## Getting Started
+A modern, production-ready Next.js application with TypeScript, comprehensive error handling, state management, testing infrastructure, and performance optimizations.
 
-First, run the development server:
+## 🚀 Features Implemented
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### ✅ Type Definitions
+- **Comprehensive Type System**: Complete TypeScript interfaces for all components, props, API responses, and state
+- **Component Props**: Typed props for Button, Input, Card, LoadingSpinner, and all other components
+- **API Types**: Well-defined interfaces for ApiResponse, User, Task, and data models
+- **State Management Types**: Type-safe state and action definitions for the global store
+
+### ✅ Error Handling
+- **Error Boundaries**: React Error Boundary component with custom fallback UI
+- **Global Error Handling**: Error handling in API client with proper HTTP status handling
+- **User-Friendly Error States**: Graceful error display with retry functionality
+- **Development vs Production**: Different error detail levels based on environment
+
+### ✅ Testing Infrastructure
+- **Jest Setup**: Complete testing configuration with TypeScript support
+- **React Testing Library**: Component testing with proper mocking
+- **Test Coverage**: Example tests for components, error boundaries, and store
+- **Test Utilities**: Custom test setup with mocked Next.js router and framer-motion
+
+### ✅ Environment Configuration
+- **Environment Variables**: Complete environment configuration system
+- **Configuration Management**: Centralized config with environment-specific settings
+- **Feature Flags**: Toggle features based on environment
+- **Security**: Proper handling of client vs server-side environment variables
+
+### ✅ API Integration
+- **Axios Client**: Configured HTTP client with interceptors
+- **API Routes**: Mock API endpoints for users and tasks
+- **Error Handling**: Comprehensive error handling for network issues
+- **Authentication**: Token-based authentication support
+
+### ✅ State Management
+- **Zustand Store**: Lightweight, type-safe global state management
+- **Persistence**: Local storage persistence for user preferences
+- **Custom Hooks**: Specialized hooks for different state slices
+- **Computed Values**: Memoized getters for derived state
+
+### ✅ Routing & Navigation
+- **Multi-Page Structure**: Complete application with dashboard, tasks, users, and settings
+- **Navigation Component**: Responsive navigation with theme toggle
+- **Lazy Loading**: Suspense-based loading states
+- **Protected Routes**: Framework for route protection
+
+### ✅ Performance Optimization
+- **Loading States**: Comprehensive loading indicators throughout the app
+- **Lazy Components**: Suspense boundaries for better performance
+- **Skeleton Loaders**: Smooth loading experience with skeleton screens
+- **Optimized Re-renders**: Memoization and proper dependency arrays
+
+## 🏗️ Architecture
+
+### Directory Structure
+```
+/home/engine/project/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   │   ├── users/         # User management endpoints
+│   │   └── tasks/         # Task management endpoints
+│   ├── dashboard/         # Dashboard page
+│   ├── tasks/             # Task management page
+│   ├── users/             # User management page
+│   ├── settings/          # Application settings
+│   ├── layout.tsx         # Root layout with error boundary
+│   └── page.tsx           # Home page
+├── components/            # Reusable UI components
+│   ├── Button.tsx         # Styled button component
+│   ├── Input.tsx          # Form input component
+│   ├── Card.tsx           # Container component
+│   ├── LoadingSpinner.tsx # Loading indicator
+│   ├── ErrorBoundary.tsx  # Error handling
+│   ├── Navigation.tsx     # App navigation
+│   ├── TaskList.tsx       # Task listing component
+│   ├── TaskForm.tsx       # Task creation/editing
+│   ├── UserList.tsx       # User listing component
+│   └── index.ts           # Component exports
+├── lib/                   # Utilities and configurations
+│   ├── api.ts             # API client and endpoints
+│   └── config.ts          # Environment configuration
+├── store/                 # State management
+│   └── index.ts           # Zustand store setup
+├── hooks/                 # Custom React hooks
+│   ├── useApi.ts          # API integration hooks
+│   ├── useForm.ts         # Form management hook
+│   └── index.ts           # Additional utility hooks
+├── types/                 # TypeScript definitions
+│   └── index.ts           # All type definitions
+├── tests/                 # Test files
+│   ├── setup.ts           # Jest setup and mocks
+│   ├── components/        # Component tests
+│   └── store/             # Store tests
+├── .env.example           # Environment variables template
+├── jest.config.js         # Jest testing configuration
+├── package.json           # Dependencies and scripts
+└── tsconfig.json          # TypeScript configuration
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
+- Node.js 18.0 or later
+- npm, yarn, or pnpm
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Installation
 
-## Learn More
+1. **Clone and install dependencies:**
+```bash
+cd /home/engine/project
+npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Set up environment variables:**
+```bash
+cp .env.example .env.local
+# Edit .env.local with your configuration
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Run the development server:**
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Open your browser:**
+Visit [http://localhost:3000](http://localhost:3000)
 
-## Deploy on Vercel
+## 📋 Available Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run test` - Run Jest tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:ci` - Run tests for CI/CD
+- `npm run type-check` - Run TypeScript type checking
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🎨 Components
+
+### Core Components
+- **Button**: Variants (primary, secondary, outline, ghost), sizes, loading states
+- **Input**: Form input with validation states and error handling
+- **Card**: Container component with header, content, and footer sections
+- **LoadingSpinner**: Customizable loading indicator
+- **Navigation**: Responsive navigation with theme switching
+
+### Feature Components
+- **TaskList**: Display and manage tasks with status updates
+- **TaskForm**: Create and edit tasks with validation
+- **UserList**: User management with role-based styling
+- **ErrorBoundary**: Error handling with custom fallbacks
+
+## 🔧 Custom Hooks
+
+### API Integration
+- **useApi**: Generic hook for API calls with loading and error states
+- **usePollingApi**: Automatic polling for real-time data
+
+### Form Management
+- **useForm**: Complete form state management with validation
+
+### Utility Hooks
+- **useDebounce**: Debounce values for search and filtering
+- **useLocalStorage**: Persistent local storage hook
+- **useToggle**: Boolean toggle functionality
+- **useAsync**: Async operation management
+
+## 🗄️ State Management
+
+The application uses Zustand for state management with the following stores:
+
+### App Store
+- User authentication state
+- Task management
+- Loading and error states
+- Theme preferences
+- Data persistence
+
+### Store Actions
+- User management (login, logout, profile)
+- CRUD operations for tasks
+- UI state management
+- Theme switching
+- Error handling
+
+## 🧪 Testing
+
+### Test Structure
+- **Unit Tests**: Component and hook testing
+- **Integration Tests**: Store and API integration
+- **Error Testing**: Error boundary and error handling
+- **Type Testing**: TypeScript type validation
+
+### Running Tests
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:ci
+```
+
+## 🌐 API Routes
+
+### Users API (`/api/users`)
+- `GET /api/users` - List users with pagination
+- `POST /api/users` - Create new user
+- `GET /api/users/[id]` - Get user by ID
+- `PUT /api/users/[id]` - Update user
+- `DELETE /api/users/[id]` - Delete user
+
+### Tasks API (`/api/tasks`)
+- `GET /api/tasks` - List tasks with filtering
+- `POST /api/tasks` - Create new task
+- `GET /api/tasks/[id]` - Get task by ID
+- `PUT /api/tasks/[id]` - Update task
+- `DELETE /api/tasks/[id]` - Delete task
+
+## 🎯 Performance Features
+
+### Loading States
+- Skeleton screens for better perceived performance
+- Spinner components with size variants
+- Loading states in forms and API calls
+
+### Lazy Loading
+- Component-level lazy loading with Suspense
+- Route-based code splitting ready
+- Optimized bundle splitting
+
+### Error Boundaries
+- Granular error boundaries for better UX
+- Automatic error recovery
+- Development vs production error details
+
+## 🔒 Security Features
+
+### Environment Configuration
+- Client vs server-side variable separation
+- Secure API key handling
+- Environment-specific configurations
+
+### Error Handling
+- Sanitized error messages in production
+- Comprehensive error logging
+- User-friendly error displays
+
+## 🎨 Styling
+
+### Tailwind CSS
+- Utility-first CSS framework
+- Dark mode support with system preference detection
+- Responsive design patterns
+- Consistent design tokens
+
+### Component Styling
+- Consistent spacing and typography
+- Hover and focus states
+- Animation support with framer-motion
+- Accessibility-focused design
+
+## 📱 Responsive Design
+
+- Mobile-first approach
+- Responsive navigation with mobile menu
+- Flexible grid layouts
+- Touch-friendly interactive elements
+
+## 🚀 Deployment
+
+### Build Process
+```bash
+npm run build
+npm start
+```
+
+### Environment Variables for Production
+Set the following in your production environment:
+- `NEXT_PUBLIC_API_URL`
+- `NEXT_PUBLIC_APP_NAME`
+- `NEXT_PUBLIC_ENVIRONMENT=production`
+- `NEXT_PUBLIC_ENABLE_ERROR_REPORTING`
+- `NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING`
+
+### Static Export
+The application can be exported as a static site for deployment on any static hosting platform.
+
+## 🤝 Contributing
+
+1. Follow the established code structure
+2. Add TypeScript types for all new code
+3. Write tests for new features
+4. Update documentation as needed
+5. Follow the existing naming conventions
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+---
+
+Built with ❤️ using Next.js, TypeScript, and modern React patterns.
