@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { User } from '@/types';
 import { userApi } from '@/lib/api';
@@ -16,9 +18,9 @@ export const UserList: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await userApi.getAll<User[]>();
+      const response = await userApi.getAll();
       if (response.success && response.data) {
-        setUsers(response.data);
+        setUsers(response.data as User[]);
       } else {
         throw new Error((response as { error?: string }).error || 'Failed to fetch users');
       }

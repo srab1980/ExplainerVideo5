@@ -1,4 +1,5 @@
-import { Metadata } from 'next';
+'use client';
+
 import { Suspense } from 'react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
@@ -7,11 +8,6 @@ import { TaskList } from '@/components/TaskList';
 import { TaskForm } from '@/components/TaskForm';
 import { useTaskStore } from '@/store';
 import { useState } from 'react';
-
-export const metadata: Metadata = {
-  title: 'Tasks - Next.js App',
-  description: 'Manage your tasks efficiently.',
-};
 
 function TaskListSkeleton() {
   return (

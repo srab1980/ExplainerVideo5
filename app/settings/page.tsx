@@ -1,13 +1,9 @@
-import { Metadata } from 'next';
+'use client';
+
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { useThemeStore } from '@/store';
 import { useState } from 'react';
-
-export const metadata: Metadata = {
-  title: 'Settings - Next.js App',
-  description: 'Configure your application settings and preferences.',
-};
 
 export default function SettingsPage() {
   const { theme, toggleTheme } = useThemeStore();

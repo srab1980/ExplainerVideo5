@@ -34,10 +34,11 @@ const mockUsers: User[] = [
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = mockUsers.find(u => u.id === params.id);
+    const { id } = await params;
+    const user = mockUsers.find(u => u.id === id);
     
     if (!user) {
       return NextResponse.json(
@@ -60,11 +61,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json();
-    const userIndex = mockUsers.findIndex(u => u.id === params.id);
+    const { id } = await params;
+    const userIndex = mockUsers.findIndex(u => u.id === id);
     
     if (userIndex === -1) {
       return NextResponse.json(
@@ -95,10 +97,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userIndex = mockUsers.findIndex(u => u.id === params.id);
+    const { id } = await params;
+    const userIndex = mockUsers.findIndex(u => u.id === id);
     
     if (userIndex === -1) {
       return NextResponse.json(

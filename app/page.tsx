@@ -1,12 +1,8 @@
-import { Metadata } from 'next';
+'use client';
+
 import { Button } from '@/components/Button';
 import Link from 'next/link';
 import { useThemeStore } from '@/store';
-
-export const metadata: Metadata = {
-  title: 'Home - Next.js App',
-  description: 'Welcome to our Next.js application with TypeScript and modern features.',
-};
 
 export default function HomePage() {
   const { theme } = useThemeStore();

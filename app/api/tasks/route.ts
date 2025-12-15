@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
         id: assigneeId,
         name: 'Unknown User',
         email: 'unknown@example.com',
-        role: 'user',
+        role: 'user' as const,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };

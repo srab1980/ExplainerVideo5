@@ -1,14 +1,10 @@
-import { Metadata } from 'next';
+'use client';
+
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { useTaskStore } from '@/store';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import Link from 'next/link';
-
-export const metadata: Metadata = {
-  title: 'Dashboard - Next.js App',
-  description: 'Dashboard overview with tasks and user statistics.',
-};
 
 export default function DashboardPage() {
   const { tasks, completedTasks, pendingTasks, loading } = useTaskStore();

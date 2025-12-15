@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Button } from './Button';
 import { Input } from './Input';
@@ -75,7 +77,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, initialData }) =>
       });
 
       onSuccess?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'An error occurred while creating the task');
     } finally {
       setLoading(false);

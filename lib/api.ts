@@ -21,11 +21,6 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Add API secret key for server-side requests
-    if (config.api?.secretKey && typeof window === 'undefined') {
-      config.headers['X-API-Key'] = config.api.secretKey;
-    }
-    
     return config;
   },
   (error) => {

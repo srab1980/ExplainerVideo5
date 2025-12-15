@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import React from 'react';
 
@@ -73,7 +73,7 @@ describe('ErrorBoundary', () => {
   it('shows error details in development', () => {
     // Mock development environment
     const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
+    (process as any).env.NODE_ENV = 'development';
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
     render(
@@ -84,7 +84,7 @@ describe('ErrorBoundary', () => {
     
     expect(screen.getByText(/error details/i)).toBeInTheDocument();
     
-    process.env.NODE_ENV = originalEnv;
+    (process as any).env.NODE_ENV = originalEnv;
     consoleSpy.mockRestore();
   });
 
