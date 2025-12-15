@@ -23,6 +23,7 @@ export interface InputProps extends BaseComponentProps {
   error?: string;
   required?: boolean;
   label?: string;
+  name?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
@@ -92,6 +93,30 @@ export interface EnvironmentVariables {
   API_SECRET_KEY?: string;
 }
 
+// Toast Types
+export interface ToastItem {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  duration?: number;
+}
+
+// Auth Types
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterCredentials extends LoginCredentials {
+  name: string;
+  confirmPassword: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+}
+
 // State Management Types
 export interface AppState {
   user: User | null;
@@ -99,6 +124,7 @@ export interface AppState {
   loading: boolean;
   error: string | null;
   theme: 'light' | 'dark';
+  toasts: ToastItem[];
 }
 
 export interface AppActions {
@@ -118,6 +144,10 @@ export interface AppActions {
   getTasksByPriority: (priority: Task['priority']) => Task[];
   getTaskById: (id: string) => Task | undefined;
   isAuthenticated: () => boolean;
+  addToast: (toast: Omit<ToastItem, 'id'>) => void;
+  removeToast: (id: string) => void;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
 }
 
 export type AppStore = AppState & AppActions;

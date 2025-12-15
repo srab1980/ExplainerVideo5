@@ -2,10 +2,11 @@
 
 import { Button } from '@/components/Button';
 import Link from 'next/link';
-import { useThemeStore } from '@/store';
+import { useThemeStore, useAppStore } from '@/store';
 
 export default function HomePage() {
   const { theme } = useThemeStore();
+  const { user } = useAppStore();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -49,24 +50,43 @@ export default function HomePage() {
         
         <div className="flex flex-col items-center text-center">
           <h1 className="max-w-xs text-2xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Ready for your first task
+            {user ? `Welcome back, ${user.name}!` : 'Ready for your first task'}
           </h1>
           <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-md">
-            Welcome to our enhanced Next.js application with TypeScript, error handling, 
-            state management, and modern development practices.
+            {user 
+              ? 'You are successfully logged in. Explore the dashboard and manage your tasks.'
+              : 'Welcome to our enhanced Next.js application with TypeScript, error handling, state management, and modern development practices.'
+            }
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 mt-8">
-            <Link href="/dashboard">
-              <Button variant="primary" className="w-full sm:w-auto">
-                Go to Dashboard
-              </Button>
-            </Link>
-            <Link href="/tasks">
-              <Button variant="outline" className="w-full sm:w-auto">
-                View Tasks
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="primary" className="w-full sm:w-auto">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+                <Link href="/tasks">
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    View Tasks
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="primary" className="w-full sm:w-auto">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    Create Account
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
           
           <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">

@@ -56,7 +56,7 @@ export function useLocalStorage<T>(
 }
 
 export function usePrevious<T>(value: T): T | undefined {
-  const ref = useRef<T>();
+  const ref = useRef<T | undefined>(undefined);
   useEffect(() => {
     ref.current = value;
   }, [value]);
@@ -154,3 +154,7 @@ export function useInView(options?: IntersectionObserverInit) {
 
   return [setRef, inView] as const;
 }
+
+export { useApi, usePollingApi } from './useApi';
+export { useForm } from './useForm';
+export { useAuth, useRequireAuth } from './useAuth';

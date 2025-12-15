@@ -8,3 +8,5 @@ export { Navigation } from './Navigation';
 export { TaskList } from './TaskList';
 export { TaskForm } from './TaskForm';
 export { UserList } from './UserList';
+export { Toast, ToastContainer } from './Toast';
+export { ToastProvider } from './ToastProvider';

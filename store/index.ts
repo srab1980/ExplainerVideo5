@@ -10,6 +10,7 @@ const initialState: Omit<AppState, keyof AppActions> = {
   loading: false,
   error: null,
   theme: 'light',
+  toasts: [],
 };
 
 // Create the store with persistence
@@ -49,6 +50,50 @@ export const useAppStore = create<AppState & AppActions>()(
       // Utility actions
       reset: () => set(initialState),
       clearTasks: () => set({ tasks: [] }),
+      
+      // Toast actions
+      addToast: (toast) => {
+        const id = Math.random().toString(36).slice(2, 11);
+        set((state) => ({
+          toasts: [...state.toasts, { ...toast, id }],
+        }));
+      },
+      removeToast: (id: string) => set((state) => ({
+        toasts: state.toasts.filter((toast) => toast.id !== id),
+      })),
+      
+      // Auth actions
+      login: async (email: string, password: string) => {
+        set({ loading: true, error: null });
+        try {
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Login failed');
+          }
+          
+          const data = await response.json();
+          localStorage.setItem('authToken', data.token);
+          set({ user: data.user, loading: false });
+          get().addToast({ message: 'Successfully logged in!', type: 'success' });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Login failed';
+          set({ error: message, loading: false });
+          get().addToast({ message, type: 'error' });
+          throw error;
+        }
+      },
+      
+      logout: () => {
+        localStorage.removeItem('authToken');
+        set({ user: null });
+        get().addToast({ message: 'Successfully logged out', type: 'info' });
+      },
       
       // Computed getters (selectors)
       getCompletedTasks: () => get().tasks.filter((task) => task.status === 'completed'),
