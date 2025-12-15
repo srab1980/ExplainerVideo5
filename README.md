@@ -127,9 +127,13 @@ A modern, production-ready Next.js application with TypeScript, comprehensive er
 
 ## 🛠️ Getting Started
 
+### Quick Start
+See [QUICK_START.md](./QUICK_START.md) for a 5-minute setup guide.
+
 ### Prerequisites
 - Node.js 18.0 or later
 - npm, yarn, or pnpm
+- PostgreSQL (local or cloud)
 
 ### Installation
 
@@ -139,10 +143,14 @@ cd /home/engine/project
 npm install
 ```
 
-2. **Set up environment variables:**
+2. **Set up database:**
 ```bash
-cp .env.example .env.local
-# Edit .env.local with your configuration
+npm run db:setup
+# Or manually:
+cp .env.example .env
+# Edit .env with your database credentials
+npx prisma migrate dev
+npm run db:seed
 ```
 
 3. **Run the development server:**
@@ -153,16 +161,29 @@ npm run dev
 4. **Open your browser:**
 Visit [http://localhost:3000](http://localhost:3000)
 
+**Demo Login**: Use `admin@example.com` / `password123`
+
 ## 📋 Available Scripts
 
+### Development
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run type-check` - Run TypeScript type checking
+
+### Testing
 - `npm run test` - Run Jest tests
 - `npm run test:watch` - Run tests in watch mode
 - `npm run test:ci` - Run tests for CI/CD
-- `npm run type-check` - Run TypeScript type checking
+
+### Database
+- `npm run db:setup` - Interactive database setup
+- `npm run db:migrate` - Run database migrations
+- `npm run db:seed` - Seed database with demo data
+- `npm run db:studio` - Open Prisma Studio (database GUI)
+- `npm run db:generate` - Generate Prisma Client
+- `npm run db:reset` - Reset database (development only!)
 
 ## 🎨 Components
 
@@ -325,13 +346,40 @@ Set the following in your production environment:
 ### Static Export
 The application can be exported as a static site for deployment on any static hosting platform.
 
+## 📚 Documentation
+
+- **[QUICK_START.md](./QUICK_START.md)** - Get started in 5 minutes
+- **[NEXT_STEPS.md](./NEXT_STEPS.md)** - Development roadmap and future plans
+- **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Detailed implementation guide for database integration
+- **[ROADMAP_TASKS.md](./ROADMAP_TASKS.md)** - Checklist of all roadmap tasks
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contributing guidelines
+- **[AUTH_IMPLEMENTATION.md](./AUTH_IMPLEMENTATION.md)** - Authentication system documentation
+
 ## 🤝 Contributing
 
-1. Follow the established code structure
-2. Add TypeScript types for all new code
-3. Write tests for new features
-4. Update documentation as needed
-5. Follow the existing naming conventions
+We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+
+Quick overview:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Follow code standards and add tests
+4. Commit using conventional commits
+5. Push and create a Pull Request
+
+## 🗺️ Roadmap
+
+See [NEXT_STEPS.md](./NEXT_STEPS.md) for the complete development roadmap.
+
+**Current Focus (Phase 1):**
+- ✅ Planning and documentation (Complete)
+- 🔄 Database integration with Prisma
+- 🔄 Production-ready authentication with NextAuth.js
+
+**Next Phases:**
+- Phase 2: Comprehensive testing and CI/CD
+- Phase 3: Advanced features (email verification, 2FA, real-time updates)
+- Phase 4: Performance optimization and monitoring
+- Phase 5: DevOps and infrastructure
 
 ## 📝 License
 
