@@ -78,7 +78,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, initialData }) =>
 
       onSuccess?.();
     } catch (err: unknown) {
-      setError(err.message || 'An error occurred while creating the task');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred while creating the task';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

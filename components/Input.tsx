@@ -11,6 +11,7 @@ export const Input: React.FC<InputProps> = ({
   error,
   required = false,
   label,
+  name,
   onChange,
   onFocus,
   onBlur,
@@ -36,6 +37,7 @@ export const Input: React.FC<InputProps> = ({
       <input
         className={classes}
         type={type}
+        name={name}
         placeholder={placeholder}
         value={value}
         defaultValue={defaultValue}

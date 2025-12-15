@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useThemeStore } from '@/store';
+import { usePathname, useRouter } from 'next/navigation';
+import { useThemeStore, useAppStore } from '@/store';
 
 interface NavItem {
   name: string;
@@ -21,7 +21,18 @@ const navItems: NavItem[] = [
 
 export const Navigation: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
+  const { user, logout } = useAppStore();
+
+  const handleAuthAction = () => {
+    if (user) {
+      logout();
+      router.push('/');
+    } else {
+      router.push('/login');
+    }
+  };
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
@@ -71,8 +82,19 @@ export const Navigation: React.FC = () => {
               )}
             </button>
             
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-              Sign In
+            {user && (
+              <div className="hidden sm:flex items-center space-x-3">
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {user.name}
+                </span>
+              </div>
+            )}
+            
+            <button 
+              onClick={handleAuthAction}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              {user ? 'Sign Out' : 'Sign In'}
             </button>
           </div>
         </div>

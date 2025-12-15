@@ -73,7 +73,7 @@ describe('ErrorBoundary', () => {
   it('shows error details in development', () => {
     // Mock development environment
     const originalEnv = process.env.NODE_ENV;
-    (global as NodeJS.Global).env = { ...process.env, NODE_ENV: 'development' };
+    Object.defineProperty(process.env, 'NODE_ENV', { value: 'development', writable: true });
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
     render(
@@ -84,7 +84,7 @@ describe('ErrorBoundary', () => {
     
     expect(screen.getByText(/error details/i)).toBeInTheDocument();
     
-    (global as NodeJS.Global).env = { ...process.env, NODE_ENV: originalEnv };
+    Object.defineProperty(process.env, 'NODE_ENV', { value: originalEnv, writable: true });
     consoleSpy.mockRestore();
   });
 
