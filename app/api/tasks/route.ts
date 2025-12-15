@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(filteredTasks.length / limit),
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: newTask,
     }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

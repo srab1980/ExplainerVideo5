@@ -51,7 +51,7 @@ export async function GET(
       success: true,
       data: user,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -87,7 +87,7 @@ export async function PUT(
       success: true,
       data: updatedUser,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -116,7 +116,7 @@ export async function DELETE(
       success: true,
       message: 'User deleted successfully',
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

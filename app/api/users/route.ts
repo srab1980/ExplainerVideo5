@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(filteredUsers.length / limit),
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: newUser,
     }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

@@ -41,8 +41,8 @@ export const UserList: React.FC = () => {
       } else {
         throw new Error(response.error || 'Failed to delete user');
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 

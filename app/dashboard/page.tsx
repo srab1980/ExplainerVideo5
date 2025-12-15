@@ -7,7 +7,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const { tasks, completedTasks, pendingTasks, loading } = useTaskStore();
+  const { tasks, completedTasks, loading } = useTaskStore();
 
   if (loading) {
     return (

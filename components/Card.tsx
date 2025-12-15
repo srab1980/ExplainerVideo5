@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import Image from 'next/image';
 import { CardProps } from '@/types';
 
 export const Card: React.FC<CardProps> = ({
@@ -17,11 +20,13 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div className={classes} data-testid={testId}>
       {image && (
-        <div className="aspect-w-16 aspect-h-9">
-          <img
+        <div className="relative w-full h-48">
+          <Image
             src={image}
             alt={imageAlt || title || 'Card image'}
-            className="w-full h-48 object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </div>
       )}

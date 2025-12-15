@@ -2,9 +2,7 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { UserList } from '@/components/UserList';
-import { userApi } from '@/lib/api';
 
 export const metadata: Metadata = {
   title: 'Users - Next.js App',
