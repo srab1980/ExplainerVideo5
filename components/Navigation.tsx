@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useThemeStore, useAppStore } from '@/store';
+import { useThemeStore } from '@/store';
+import { useSession, signOut } from 'next-auth/react';
 
 interface NavItem {
   name: string;
@@ -23,14 +24,14 @@ export const Navigation: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
-  const { user, logout } = useAppStore();
+  const { data: session, status } = useSession();
 
-  const handleAuthAction = () => {
-    if (user) {
-      logout();
+  const handleAuthAction = async () => {
+    if (session) {
+      await signOut({ redirect: false });
       router.push('/');
     } else {
-      router.push('/login');
+      router.push('/auth/signin');
     }
   };
 
@@ -44,25 +45,27 @@ export const Navigation: React.FC = () => {
                 Next.js App
               </Link>
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'border-blue-500 text-gray-900 dark:text-white'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white'
-                    }`}
-                  >
-                    {item.icon && <item.icon className="w-4 h-4 mr-2" />}
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </div>
+            {status === 'authenticated' && (
+              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                {navItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'border-blue-500 text-gray-900 dark:text-white'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white'
+                      }`}
+                    >
+                      {item.icon && <item.icon className="w-4 h-4 mr-2" />}
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
           
           <div className="flex items-center space-x-4">
@@ -82,10 +85,10 @@ export const Navigation: React.FC = () => {
               )}
             </button>
             
-            {user && (
+            {session?.user && (
               <div className="hidden sm:flex items-center space-x-3">
                 <span className="text-sm text-gray-700 dark:text-gray-300">
-                  {user.name}
+                  {session.user.name || session.user.email}
                 </span>
               </div>
             )}
@@ -94,33 +97,35 @@ export const Navigation: React.FC = () => {
               onClick={handleAuthAction}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
-              {user ? 'Sign Out' : 'Sign In'}
+              {session ? 'Sign Out' : 'Sign In'}
             </button>
           </div>
         </div>
       </div>
       
       {/* Mobile menu */}
-      <div className="sm:hidden">
-        <div className="pt-2 pb-3 space-y-1">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors ${
-                  isActive
-                    ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
-                }`}
-              >
-                {item.name}
-              </Link>
-            );
-          })}
+      {status === 'authenticated' && (
+        <div className="sm:hidden">
+          <div className="pt-2 pb-3 space-y-1">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors ${
+                    isActive
+                      ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
+                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 };
