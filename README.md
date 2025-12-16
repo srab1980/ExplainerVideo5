@@ -2,6 +2,18 @@
 
 A modern, production-ready Next.js application with TypeScript, comprehensive error handling, state management, testing infrastructure, and performance optimizations.
 
+---
+
+## 🎯 **NEW DEVELOPER? START HERE!**
+
+**Looking for what to do next?** → Read **[WHAT_TO_DO_NOW.md](./WHAT_TO_DO_NOW.md)** 👈
+
+**Ready to implement?** → Read **[IMMEDIATE_NEXT_STEPS.md](./IMMEDIATE_NEXT_STEPS.md)** 👈
+
+**Want the overview?** → Read **[START_DEVELOPMENT.md](./START_DEVELOPMENT.md)** 👈
+
+---
+
 ## 🚀 Features Implemented
 
 ### ✅ Authentication System ⭐ NEW
