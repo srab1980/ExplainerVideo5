@@ -1,20 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Task } from '@/types';
 import { prisma } from '@/lib/prisma';
+import { getAuthSession, isPrivilegedRole } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = getAuthSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const privileged = isPrivilegedRole(session.role);
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const status = searchParams.get('status');
     const priority = searchParams.get('priority');
     const search = searchParams.get('search') || '';
-    const userId = searchParams.get('userId');
-    
+    const userId = privileged ? searchParams.get('userId') : null;
+
     const skip = (page - 1) * limit;
 
     const whereClause: Record<string, unknown> = {};
+
+    if (!privileged) {
+      whereClause.userId = session.userId;
+    }
 
     if (status) {
       whereClause.status = status;
@@ -85,9 +100,22 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = getAuthSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const privileged = isPrivilegedRole(session.role);
+
     const body = await request.json();
-    const { title, description, status = 'pending', priority = 'medium', userId } = body;
-    
+    const { title, description, status = 'pending', priority = 'medium' } = body;
+
+    const requestedUserId = body.userId ?? body.assigneeId;
+    const targetUserId = privileged ? (requestedUserId ?? session.userId) : session.userId;
+
     if (!title) {
       return NextResponse.json(
         { success: false, error: 'Title is required' },
@@ -95,16 +123,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-
-    // Verify user exists
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: targetUserId },
     });
 
     if (!user) {
@@ -120,7 +140,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         status,
         priority,
-        userId,
+        userId: targetUserId,
       },
       include: { user: true },
     });

@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AuthResponse, User } from '@/types';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { createAuthToken, setAuthCookie } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password } = body;
 
-    // Validate input
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user in database
     const dbUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -28,7 +27,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify password
     const passwordMatch = await bcrypt.compare(password, dbUser.password);
 
     if (!passwordMatch) {
@@ -38,7 +36,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Transform to User type for response
     const user: User = {
       id: dbUser.id,
       name: dbUser.name || '',
@@ -48,15 +45,21 @@ export async function POST(request: NextRequest) {
       updatedAt: dbUser.updatedAt.toISOString(),
     };
 
-    // Generate JWT token (base64 encoded for now)
-    const token = Buffer.from(JSON.stringify({ userId: user.id, email: user.email })).toString('base64');
+    const token = createAuthToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
-    const response: AuthResponse = {
+    const responseBody: AuthResponse = {
       user,
       token,
     };
 
-    return NextResponse.json(response, { status: 200 });
+    const response = NextResponse.json(responseBody, { status: 200 });
+    setAuthCookie(response, token);
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(

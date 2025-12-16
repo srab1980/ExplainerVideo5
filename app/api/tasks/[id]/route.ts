@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Task } from '@/types';
 import { prisma } from '@/lib/prisma';
+import { getAuthSession, isPrivilegedRole } from '@/lib/auth';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = getAuthSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const privileged = isPrivilegedRole(session.role);
+
     const { id } = await params;
 
     const task = await prisma.task.findUnique({
@@ -15,6 +26,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json(
         { success: false, error: 'Task not found' },
         { status: 404 }
+      );
+    }
+
+    if (!privileged && task.userId !== session.userId) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden' },
+        { status: 403 }
       );
     }
 
@@ -51,9 +69,20 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = getAuthSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const privileged = isPrivilegedRole(session.role);
+
     const { id } = await params;
     const body = await request.json();
-    const { title, description, status, priority, userId } = body;
+    const { title, description, status, priority, userId, assigneeId } = body;
+    const nextUserId = userId ?? assigneeId;
 
     const task = await prisma.task.findUnique({
       where: { id },
@@ -67,10 +96,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       );
     }
 
-    // If updating userId, verify the new user exists
-    if (userId && userId !== task.userId) {
+    if (!privileged && task.userId !== session.userId) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden' },
+        { status: 403 }
+      );
+    }
+
+    if (privileged && nextUserId && nextUserId !== task.userId) {
       const newUser = await prisma.user.findUnique({
-        where: { id: userId },
+        where: { id: nextUserId },
       });
 
       if (!newUser) {
@@ -88,7 +123,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         ...(description !== undefined && { description }),
         ...(status !== undefined && { status }),
         ...(priority !== undefined && { priority }),
-        ...(userId !== undefined && { userId }),
+        ...(privileged && nextUserId !== undefined && { userId: nextUserId }),
       },
       include: { user: true },
     });
@@ -126,6 +161,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = getAuthSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const privileged = isPrivilegedRole(session.role);
+
     const { id } = await params;
 
     const task = await prisma.task.findUnique({
@@ -136,6 +181,13 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json(
         { success: false, error: 'Task not found' },
         { status: 404 }
+      );
+    }
+
+    if (!privileged && task.userId !== session.userId) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden' },
+        { status: 403 }
       );
     }
 
