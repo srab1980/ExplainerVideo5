@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthResponse, User } from '@/types';
+import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,26 +16,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Mock authentication - In production, verify against a database
-    // For demo purposes, accept any email with password "password123"
-    if (password !== 'password123') {
+    // Find user in database
+    const dbUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!dbUser) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
 
-    // Mock user data
+    // Verify password
+    const passwordMatch = await bcrypt.compare(password, dbUser.password);
+
+    if (!passwordMatch) {
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
+    // Transform to User type for response
     const user: User = {
-      id: Math.random().toString(36).slice(2, 11),
-      name: email.split('@')[0],
-      email,
-      role: 'user',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      id: dbUser.id,
+      name: dbUser.name || '',
+      email: dbUser.email,
+      role: dbUser.role as 'admin' | 'user' | 'moderator',
+      createdAt: dbUser.createdAt.toISOString(),
+      updatedAt: dbUser.updatedAt.toISOString(),
     };
 
-    // Generate mock JWT token (in production, use a proper JWT library)
+    // Generate JWT token (base64 encoded for now)
     const token = Buffer.from(JSON.stringify({ userId: user.id, email: user.email })).toString('base64');
 
     const response: AuthResponse = {

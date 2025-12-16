@@ -76,7 +76,7 @@ export interface User {
 export interface Task {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   assignee?: User;
