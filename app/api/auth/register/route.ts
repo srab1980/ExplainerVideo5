@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthResponse, User } from '@/types';
+import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,17 +39,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Mock user creation - In production, save to database
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'Email already registered' },
+        { status: 400 }
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user in database
+    const dbUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role: 'user',
+      },
+    });
+
+    // Transform to User type for response
     const user: User = {
-      id: Math.random().toString(36).slice(2, 11),
-      name,
-      email,
-      role: 'user',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      id: dbUser.id,
+      name: dbUser.name || '',
+      email: dbUser.email,
+      role: dbUser.role as 'admin' | 'user' | 'moderator',
+      createdAt: dbUser.createdAt.toISOString(),
+      updatedAt: dbUser.updatedAt.toISOString(),
     };
 
-    // Generate mock JWT token (in production, use a proper JWT library)
+    // Generate JWT token (base64 encoded for now)
     const token = Buffer.from(JSON.stringify({ userId: user.id, email: user.email })).toString('base64');
 
     const response: AuthResponse = {

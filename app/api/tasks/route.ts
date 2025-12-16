@@ -1,55 +1,6 @@
-// Mock API route for tasks
 import { NextRequest, NextResponse } from 'next/server';
 import { Task } from '@/types';
-
-// Mock data
-const mockTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Complete project setup',
-    description: 'Set up the initial project structure with Next.js, TypeScript, and Tailwind CSS',
-    status: 'completed',
-    priority: 'high',
-    assignee: {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      role: 'admin',
-      createdAt: '2023-01-01T00:00:00Z',
-      updatedAt: '2023-01-01T00:00:00Z',
-    },
-    createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2023-01-01T00:00:00Z',
-    dueDate: '2023-01-15T00:00:00Z',
-  },
-  {
-    id: '2',
-    title: 'Implement authentication',
-    description: 'Add user authentication and authorization features',
-    status: 'in-progress',
-    priority: 'medium',
-    assignee: {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      role: 'user',
-      createdAt: '2023-01-02T00:00:00Z',
-      updatedAt: '2023-01-02T00:00:00Z',
-    },
-    createdAt: '2023-01-02T00:00:00Z',
-    updatedAt: '2023-01-02T00:00:00Z',
-    dueDate: '2023-02-01T00:00:00Z',
-  },
-  {
-    id: '3',
-    title: 'Design responsive layout',
-    description: 'Create a responsive layout that works on all device sizes',
-    status: 'pending',
-    priority: 'low',
-    createdAt: '2023-01-03T00:00:00Z',
-    updatedAt: '2023-01-03T00:00:00Z',
-  },
-];
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,41 +10,72 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const priority = searchParams.get('priority');
     const search = searchParams.get('search') || '';
+    const userId = searchParams.get('userId');
     
-    let filteredTasks = [...mockTasks];
-    
-    // Apply filters
+    const skip = (page - 1) * limit;
+
+    const whereClause: Record<string, unknown> = {};
+
     if (status) {
-      filteredTasks = filteredTasks.filter(task => task.status === status);
+      whereClause.status = status;
     }
-    
+
     if (priority) {
-      filteredTasks = filteredTasks.filter(task => task.priority === priority);
+      whereClause.priority = priority;
     }
-    
+
+    if (userId) {
+      whereClause.userId = userId;
+    }
+
     if (search) {
-      filteredTasks = filteredTasks.filter(task => 
-        task.title.toLowerCase().includes(search.toLowerCase()) ||
-        task.description.toLowerCase().includes(search.toLowerCase())
-      );
+      whereClause.OR = [
+        { title: { contains: search, mode: 'insensitive' as const } },
+        { description: { contains: search, mode: 'insensitive' as const } },
+      ];
     }
-    
-    // Apply pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedTasks = filteredTasks.slice(startIndex, endIndex);
+
+    const [tasks, total] = await Promise.all([
+      prisma.task.findMany({
+        where: Object.keys(whereClause).length > 0 ? whereClause : undefined,
+        include: { user: true },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.task.count({ where: Object.keys(whereClause).length > 0 ? whereClause : undefined }),
+    ]);
+
+    const data = tasks.map(task => ({
+      id: task.id,
+      title: task.title,
+      description: task.description || undefined,
+      status: task.status as 'pending' | 'in-progress' | 'completed' | 'cancelled',
+      priority: task.priority as 'low' | 'medium' | 'high' | 'urgent',
+      assignee: {
+        id: task.user.id,
+        name: task.user.name || '',
+        email: task.user.email,
+        role: task.user.role as 'admin' | 'user' | 'moderator',
+        createdAt: task.user.createdAt.toISOString(),
+        updatedAt: task.user.updatedAt.toISOString(),
+      },
+      createdAt: task.createdAt.toISOString(),
+      updatedAt: task.updatedAt.toISOString(),
+    }));
     
     return NextResponse.json({
       success: true,
-      data: paginatedTasks,
+      data,
       pagination: {
         page,
         limit,
-        total: filteredTasks.length,
-        totalPages: Math.ceil(filteredTasks.length / limit),
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     });
-  } catch {
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -104,7 +86,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, description, status = 'pending', priority = 'medium', assigneeId, dueDate } = body;
+    const { title, description, status = 'pending', priority = 'medium', userId } = body;
     
     if (!title) {
       return NextResponse.json(
@@ -112,39 +94,61 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
-    let assignee;
-    if (assigneeId) {
-      // In a real app, you'd fetch the user from the database
-      assignee = {
-        id: assigneeId,
-        name: 'Unknown User',
-        email: 'unknown@example.com',
-        role: 'user' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'User ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Verify user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'User not found' },
+        { status: 404 }
+      );
     }
     
+    const task = await prisma.task.create({
+      data: {
+        title,
+        description: description || null,
+        status,
+        priority,
+        userId,
+      },
+      include: { user: true },
+    });
+
     const newTask: Task = {
-      id: String(mockTasks.length + 1),
-      title,
-      description,
-      status,
-      priority,
-      assignee,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      dueDate,
+      id: task.id,
+      title: task.title,
+      description: task.description || undefined,
+      status: task.status as 'pending' | 'in-progress' | 'completed' | 'cancelled',
+      priority: task.priority as 'low' | 'medium' | 'high' | 'urgent',
+      assignee: {
+        id: task.user.id,
+        name: task.user.name || '',
+        email: task.user.email,
+        role: task.user.role as 'admin' | 'user' | 'moderator',
+        createdAt: task.user.createdAt.toISOString(),
+        updatedAt: task.user.updatedAt.toISOString(),
+      },
+      createdAt: task.createdAt.toISOString(),
+      updatedAt: task.updatedAt.toISOString(),
     };
-    
-    mockTasks.push(newTask);
     
     return NextResponse.json({
       success: true,
       data: newTask,
     }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error('Error creating task:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

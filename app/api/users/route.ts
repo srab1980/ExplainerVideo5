@@ -1,36 +1,6 @@
-// Mock API route for users
 import { NextRequest, NextResponse } from 'next/server';
 import { User } from '@/types';
-
-// Mock data
-const mockUsers: User[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    avatar: '/avatars/john.jpg',
-    role: 'admin',
-    createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2023-01-01T00:00:00Z',
-  },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    avatar: '/avatars/jane.jpg',
-    role: 'user',
-    createdAt: '2023-01-02T00:00:00Z',
-    updatedAt: '2023-01-02T00:00:00Z',
-  },
-  {
-    id: '3',
-    name: 'Bob Johnson',
-    email: 'bob@example.com',
-    role: 'moderator',
-    createdAt: '2023-01-03T00:00:00Z',
-    updatedAt: '2023-01-03T00:00:00Z',
-  },
-];
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,32 +9,46 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
     
-    let filteredUsers = mockUsers;
+    const skip = (page - 1) * limit;
     
-    // Apply search filter
-    if (search) {
-      filteredUsers = mockUsers.filter(user => 
-        user.name.toLowerCase().includes(search.toLowerCase()) ||
-        user.email.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-    
-    // Apply pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+    const whereClause = search ? {
+      OR: [
+        { name: { contains: search, mode: 'insensitive' as const } },
+        { email: { contains: search, mode: 'insensitive' as const } },
+      ],
+    } : undefined;
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.user.count({ where: whereClause }),
+    ]);
+
+    const data = users.map(user => ({
+      id: user.id,
+      name: user.name || '',
+      email: user.email,
+      role: user.role as 'admin' | 'user' | 'moderator',
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
+    }));
     
     return NextResponse.json({
       success: true,
-      data: paginatedUsers,
+      data,
       pagination: {
         page,
         limit,
-        total: filteredUsers.length,
-        totalPages: Math.ceil(filteredUsers.length / limit),
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     });
-  } catch {
+  } catch (error) {
+    console.error('Error fetching users:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -75,7 +59,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, role = 'user' } = body;
+    const { name, email, password, role = 'user' } = body;
     
     if (!name || !email) {
       return NextResponse.json(
@@ -83,23 +67,43 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { success: false, error: 'Email already exists' },
+        { status: 400 }
+      );
+    }
     
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: password || Math.random().toString(36).slice(2),
+        role,
+      },
+    });
+
     const newUser: User = {
-      id: String(mockUsers.length + 1),
-      name,
-      email,
-      role,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      id: user.id,
+      name: user.name || '',
+      email: user.email,
+      role: user.role as 'admin' | 'user' | 'moderator',
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
     };
-    
-    mockUsers.push(newUser);
     
     return NextResponse.json({
       success: true,
       data: newUser,
     }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error('Error creating user:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
