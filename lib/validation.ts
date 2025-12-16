@@ -157,9 +157,9 @@ export function validate<T>(schema: z.ZodSchema<T>, data: unknown): {
 export function formatValidationErrors(error: z.ZodError): Record<string, string> {
   const formatted: Record<string, string> = {};
   
-  error.errors.forEach((err) => {
-    const path = err.path.join('.');
-    formatted[path] = err.message;
+  error.issues.forEach((issue) => {
+    const path = issue.path.join('.');
+    formatted[path] = issue.message;
   });
   
   return formatted;
@@ -169,5 +169,5 @@ export function formatValidationErrors(error: z.ZodError): Record<string, string
  * Get first validation error message
  */
 export function getFirstError(error: z.ZodError): string {
-  return error.errors[0]?.message || 'Validation failed';
+  return error.issues[0]?.message || 'Validation failed';
 }

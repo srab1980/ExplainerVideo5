@@ -1,13 +1,9 @@
-import { Metadata } from 'next';
+'use client';
+
 import { Suspense } from 'react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { UserList } from '@/components/UserList';
-
-export const metadata: Metadata = {
-  title: 'Users - Next.js App',
-  description: 'Manage application users and their permissions.',
-};
 
 function UserListSkeleton() {
   return (

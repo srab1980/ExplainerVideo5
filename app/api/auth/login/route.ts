@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       where: { email },
     });
 
-    if (!dbUser) {
+    if (!dbUser || !dbUser.password) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
