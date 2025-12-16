@@ -24,6 +24,9 @@ export interface InputProps extends BaseComponentProps {
   required?: boolean;
   label?: string;
   name?: string;
+  id?: string;
+  minLength?: number;
+  maxLength?: number;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;

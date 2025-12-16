@@ -12,6 +12,9 @@ export const Input: React.FC<InputProps> = ({
   required = false,
   label,
   name,
+  id,
+  minLength,
+  maxLength,
   onChange,
   onFocus,
   onBlur,
@@ -38,11 +41,14 @@ export const Input: React.FC<InputProps> = ({
         className={classes}
         type={type}
         name={name}
+        id={id}
         placeholder={placeholder}
         value={value}
         defaultValue={defaultValue}
         disabled={disabled}
         required={required}
+        minLength={minLength}
+        maxLength={maxLength}
         onChange={onChange}
         onFocus={onFocus}
         onBlur={onBlur}

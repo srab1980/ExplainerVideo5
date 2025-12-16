@@ -1,32 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 
-export default function AuthErrorPage() {
+function AuthErrorContent() {
   const searchParams = useSearchParams();
-  const [error, setError] = useState('');
-  
-  useEffect(() => {
+  const [error] = useState(() => {
     const errorParam = searchParams.get('error');
     
     switch (errorParam) {
       case 'Configuration':
-        setError('There is a problem with the server configuration.');
-        break;
+        return 'There is a problem with the server configuration.';
       case 'AccessDenied':
-        setError('Access denied. You do not have permission to sign in.');
-        break;
+        return 'Access denied. You do not have permission to sign in.';
       case 'Verification':
-        setError('The verification link has expired or has already been used.');
-        break;
+        return 'The verification link has expired or has already been used.';
       default:
-        setError('An error occurred during authentication.');
+        return 'An error occurred during authentication.';
     }
-  }, [searchParams]);
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -67,5 +61,13 @@ export default function AuthErrorPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <AuthErrorContent />
+    </Suspense>
   );
 }

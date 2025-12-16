@@ -188,7 +188,7 @@ export const taskDb = {
   } = {}) {
     const { userId, status, priority, skip = 0, take = 10, search } = params;
 
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     if (userId) where.userId = userId;
     if (status) where.status = status;
     if (priority) where.priority = priority;

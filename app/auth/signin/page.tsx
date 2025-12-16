@@ -30,13 +30,12 @@ export default function SignInPage() {
       if (result?.error) {
         setError('Invalid email or password');
       } else {
-        // Get session to verify login
         const session = await getSession();
         if (session) {
           router.push('/dashboard');
         }
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -49,7 +48,7 @@ export default function SignInPage() {
 
     try {
       await signIn(provider, { callbackUrl: '/dashboard' });
-    } catch (error) {
+    } catch {
       setError(`Failed to sign in with ${provider}`);
       setIsLoading(false);
     }
@@ -142,7 +141,7 @@ export default function SignInPage() {
           </div>
 
           <div className="text-center text-sm">
-            <span className="text-gray-600">Don't have an account? </span>
+            <span className="text-gray-600">Don&apos;t have an account? </span>
             <Link href="/auth/signup" className="text-blue-600 hover:text-blue-500">
               Sign up
             </Link>

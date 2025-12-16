@@ -69,7 +69,7 @@ export default function SignUpPage() {
         router.push('/dashboard');
       }, 2000);
 
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -82,7 +82,7 @@ export default function SignUpPage() {
 
     try {
       await signIn(provider, { callbackUrl: '/dashboard' });
-    } catch (error) {
+    } catch {
       setError(`Failed to sign up with ${provider}`);
       setIsLoading(false);
     }

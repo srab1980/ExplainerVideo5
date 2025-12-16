@@ -170,7 +170,7 @@ export const userApi = {
 };
 
 export const taskApi = {
-  getAll: <T = unknown>(params?: Record<string, unknown>) => api.get('/api/tasks', { params }),
+  getAll: (params?: Record<string, unknown>) => api.get('/api/tasks', { params }),
   getById: (id: string) => api.get(`/api/tasks/${id}`),
   create: <T = unknown>(task: T) => api.post('/api/tasks', task),
   update: <T = unknown>(id: string, updates: T) => api.put(`/api/tasks/${id}`, updates),

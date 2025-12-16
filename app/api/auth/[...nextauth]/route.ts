@@ -32,6 +32,11 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
+          // Check if user has a password (OAuth users may not)
+          if (!user.password) {
+            return null;
+          }
+
           // Verify password
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
@@ -76,7 +81,6 @@ export const authOptions: NextAuthOptions = {
   
   pages: {
     signIn: '/auth/signin',
-    signUp: '/auth/signup', 
     error: '/auth/error',
   },
   
@@ -99,7 +103,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       // Handle OAuth sign-in
       if (account?.provider === 'google' || account?.provider === 'github') {
         try {
