@@ -1,10 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { User } from '@/types';
 import { prisma } from '@/lib/prisma';
+import { getAuthSession } from '@/lib/auth';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = getAuthSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
+
+    if (session.role !== 'admin' && session.userId !== id) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden' },
+        { status: 403 }
+      );
+    }
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -41,9 +57,32 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = getAuthSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
+
+    if (session.role !== 'admin' && session.userId !== id) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { name, email, role } = body;
+
+    if (session.role === 'admin' && role !== undefined && !['admin', 'user', 'moderator'].includes(role)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid role' },
+        { status: 400 }
+      );
+    }
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -75,7 +114,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       data: {
         ...(name !== undefined && { name }),
         ...(email !== undefined && { email }),
-        ...(role !== undefined && { role }),
+        ...(session.role === 'admin' && role !== undefined && { role }),
       },
     });
 
@@ -103,6 +142,21 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = getAuthSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    if (session.role !== 'admin') {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden' },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
 
     const user = await prisma.user.findUnique({

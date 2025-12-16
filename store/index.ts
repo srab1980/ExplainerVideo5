@@ -90,6 +90,7 @@ export const useAppStore = create<AppState & AppActions>()(
       },
       
       logout: () => {
+        fetch('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
         localStorage.removeItem('authToken');
         set({ user: null });
         get().addToast({ message: 'Successfully logged out', type: 'info' });

@@ -7,6 +7,7 @@ import config from './config';
 const apiClient: AxiosInstance = axios.create({
   baseURL: config.api.baseURL,
   timeout: config.api.timeout,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -41,6 +42,7 @@ apiClient.interceptors.response.use(
       switch (status) {
         case 401:
           // Unauthorized - clear auth and redirect to login
+          fetch('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
           localStorage.removeItem('authToken');
           window.location.href = '/login';
           break;

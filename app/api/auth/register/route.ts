@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AuthResponse, User } from '@/types';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { createAuthToken, setAuthCookie } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { name, email, password, confirmPassword } = body;
 
-    // Validate input
     if (!name || !email || !password || !confirmPassword) {
       return NextResponse.json(
         { error: 'All fields are required' },
@@ -30,7 +30,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
@@ -39,7 +38,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -51,10 +49,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user in database
     const dbUser = await prisma.user.create({
       data: {
         name,
@@ -64,7 +60,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Transform to User type for response
     const user: User = {
       id: dbUser.id,
       name: dbUser.name || '',
@@ -74,15 +69,21 @@ export async function POST(request: NextRequest) {
       updatedAt: dbUser.updatedAt.toISOString(),
     };
 
-    // Generate JWT token (base64 encoded for now)
-    const token = Buffer.from(JSON.stringify({ userId: user.id, email: user.email })).toString('base64');
+    const token = createAuthToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
-    const response: AuthResponse = {
+    const responseBody: AuthResponse = {
       user,
       token,
     };
 
-    return NextResponse.json(response, { status: 201 });
+    const response = NextResponse.json(responseBody, { status: 201 });
+    setAuthCookie(response, token);
+
+    return response;
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(
