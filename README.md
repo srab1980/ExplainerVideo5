@@ -6,17 +6,19 @@ A modern, production-ready Next.js application with TypeScript, comprehensive er
 
 ## 🎯 **NEW DEVELOPER? START HERE!**
 
-### 🚨 **"What should be our next step?"** → **[YOUR_NEXT_STEP.md](./YOUR_NEXT_STEP.md)** ⭐
+### 🚨 **Next Step:** → **[NEXT_STEP_NOW.md](./NEXT_STEP_NOW.md)** ⭐
 
-**Quick Answer:** Complete environment setup (30 min) - The app is 95% done!
+**Action Required:** Install dependencies & set up environment (15-30 min)
 
-**Detailed Guide:** [NEXT_STEP_PROPOSAL.md](./NEXT_STEP_PROPOSAL.md)  
-**Summary:** [ANSWER_SUMMARY.md](./ANSWER_SUMMARY.md)
+**Quick Start:**
+```bash
+npm install --legacy-peer-deps
+cp .env.example .env  # Then configure DATABASE_URL and secrets
+```
 
 ### 📚 Other Helpful Docs:
 - **[WHAT_TO_DO_NOW.md](./WHAT_TO_DO_NOW.md)** - Quick overview
 - **[IMMEDIATE_NEXT_STEPS.md](./IMMEDIATE_NEXT_STEPS.md)** - Step-by-step guide
-- **[START_DEVELOPMENT.md](./START_DEVELOPMENT.md)** - Development overview
 - **[CURRENT_STATUS.md](./CURRENT_STATUS.md)** - Project status dashboard
 
 ---
