@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthResponse, User } from '@/types';
 import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
+import bcryptjs from 'bcryptjs';
 import { createAuthToken, setAuthCookie } from '@/lib/auth';
+import { generateVerificationToken, getVerificationExpiry, generateVerificationUrl } from '@/lib/tokens';
+import { validatePasswordStrength, validateEmail } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,15 +25,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (password.length < 8) {
+    // Enhanced password strength validation
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.valid) {
       return NextResponse.json(
-        { error: 'Password must be at least 8 characters long' },
+        { 
+          error: 'Password does not meet security requirements',
+          details: passwordValidation.errors
+        },
         { status: 400 }
       );
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Enhanced email validation
+    if (!validateEmail(email)) {
       return NextResponse.json(
         { error: 'Invalid email format' },
         { status: 400 }
@@ -49,7 +56,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcryptjs.hash(password, 10);
+
+    // Generate verification token
+    const verificationToken = generateVerificationToken();
+    const tokenExpiry = getVerificationExpiry(24); // 24 hours
 
     const dbUser = await prisma.user.create({
       data: {
@@ -57,6 +68,8 @@ export async function POST(request: NextRequest) {
         email,
         password: hashedPassword,
         role: 'user',
+        emailVerifyToken: verificationToken,
+        emailVerifyExpires: tokenExpiry,
       },
     });
 
@@ -75,9 +88,25 @@ export async function POST(request: NextRequest) {
       role: user.role,
     });
 
+    // TODO: Send verification email
+    const baseUrl = request.url.includes('localhost') 
+      ? 'http://localhost:3000' 
+      : process.env.NEXT_PUBLIC_BASE_URL || 'https://yourapp.com';
+    
+    const verificationUrl = generateVerificationUrl(verificationToken, baseUrl);
+    
+    console.log('🔗 Verification URL:', verificationUrl);
+    console.log('📧 Email would be sent to:', email);
+
     const responseBody: AuthResponse = {
-      user,
+      user: {
+        ...user,
+        emailVerified: dbUser.emailVerified, // Include verification status
+      },
       token,
+      verificationRequired: !dbUser.emailVerified,
+      // In development, include the verification URL for testing
+      ...(process.env.NODE_ENV === 'development' && { verificationUrl }),
     };
 
     const response = NextResponse.json(responseBody, { status: 201 });

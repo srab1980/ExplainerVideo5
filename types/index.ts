@@ -113,8 +113,12 @@ export interface RegisterCredentials extends LoginCredentials {
 }
 
 export interface AuthResponse {
-  user: User;
+  user: User & {
+    emailVerified?: boolean;
+  };
   token: string;
+  verificationRequired?: boolean;
+  verificationUrl?: string; // Only for development
 }
 
 // State Management Types

@@ -11,17 +11,26 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password      String
-  name          String?
-  role          String    @default("user")
-  emailVerified Boolean   @default(false)
-  tasks         Task[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  password           String
+  name               String?
+  role               String    @default("user")
+  emailVerified      Boolean   @default(false)
+  emailVerifyToken   String?
+  emailVerifyExpires DateTime?
+  passwordResetToken String?
+  passwordResetExpires DateTime?
+  failedLoginAttempts Int      @default(0)
+  lockedUntil        DateTime?
+  lastLoginAt        DateTime?
+  tasks              Task[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@index([email])
+  @@index([emailVerifyToken])
+  @@index([passwordResetToken])
   @@map("users")
 }
 
