@@ -1,13 +1,14 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState, useMemo } from 'react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { TaskList } from '@/components/TaskList';
 import { TaskForm } from '@/components/TaskForm';
+import { TaskFilters, TaskFilterState } from '@/components/TaskFilters';
 import { useTaskStore } from '@/store';
-import { useState } from 'react';
+import { filterAndSortTasks, DEFAULT_FILTERS } from '@/lib/taskFilters';
 
 function TaskListSkeleton() {
   return (
@@ -23,8 +24,22 @@ function TaskListSkeleton() {
 }
 
 export default function TasksPage() {
-  const { loading } = useTaskStore();
+  const { tasks, loading } = useTaskStore();
   const [showForm, setShowForm] = useState(false);
+  const [filters, setFilters] = useState<TaskFilterState>(DEFAULT_FILTERS);
+
+  // Apply filters and sorting
+  const filteredTasks = useMemo(() => {
+    return filterAndSortTasks(tasks, filters);
+  }, [tasks, filters]);
+
+  const handleFilterChange = (newFilters: Partial<TaskFilterState>) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters(DEFAULT_FILTERS);
+  };
 
   return (
     <div className="space-y-8">
@@ -50,6 +65,17 @@ export default function TasksPage() {
         </Card>
       )}
 
+      {/* Task Filters */}
+      <Card>
+        <TaskFilters
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onClearFilters={handleClearFilters}
+          taskCount={tasks.length}
+          filteredCount={filteredTasks.length}
+        />
+      </Card>
+
       {/* Task List */}
       <Card title="Task List">
         {loading ? (
@@ -58,7 +84,7 @@ export default function TasksPage() {
           </div>
         ) : (
           <Suspense fallback={<TaskListSkeleton />}>
-            <TaskList />
+            <TaskList tasks={filteredTasks} />
           </Suspense>
         )}
       </Card>
