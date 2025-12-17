@@ -1,9 +1,12 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { UserList } from '@/components/UserList';
+import { Modal } from '@/components/Modal';
+import { UserForm } from '@/components/UserForm';
+import { User } from '@/types';
 
 function UserListSkeleton() {
   return (
@@ -24,6 +27,31 @@ function UserListSkeleton() {
 }
 
 export default function UsersPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleAddUser = () => {
+    setEditingUser(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setEditingUser(null);
+  };
+
+  const handleSuccess = () => {
+    setIsModalOpen(false);
+    setEditingUser(null);
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -33,7 +61,7 @@ export default function UsersPage() {
             Manage application users and their permissions
           </p>
         </div>
-        <Button variant="primary">
+        <Button variant="primary" onClick={handleAddUser}>
           Add New User
         </Button>
       </div>
@@ -41,9 +69,24 @@ export default function UsersPage() {
       {/* User List */}
       <Card title="User Management">
         <Suspense fallback={<UserListSkeleton />}>
-          <UserList />
+          <UserList 
+            onEdit={handleEditUser} 
+            refreshTrigger={refreshKey}
+          />
         </Suspense>
       </Card>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        title={editingUser ? 'Edit User' : 'Add New User'}
+      >
+        <UserForm
+          initialData={editingUser}
+          onSuccess={handleSuccess}
+          onCancel={handleModalClose}
+        />
+      </Modal>
     </div>
   );
 }
