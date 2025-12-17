@@ -9,5 +9,7 @@ export { TaskList } from './TaskList';
 export { TaskForm } from './TaskForm';
 export { TaskFilters } from './TaskFilters';
 export { UserList } from './UserList';
+export { UserForm } from './UserForm';
+export { Modal } from './Modal';
 export { Toast, ToastContainer } from './Toast';
 export { ToastProvider } from './ToastProvider';

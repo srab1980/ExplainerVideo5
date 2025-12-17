@@ -6,14 +6,19 @@ import { userApi } from '@/lib/api';
 import { Button } from './Button';
 import { Card } from './Card';
 
-export const UserList: React.FC = () => {
+export interface UserListProps {
+  onEdit?: (user: User) => void;
+  refreshTrigger?: number;
+}
+
+export const UserList: React.FC<UserListProps> = ({ onEdit, refreshTrigger }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [refreshTrigger]);
 
   const fetchUsers = async () => {
     try {
@@ -146,7 +151,7 @@ export const UserList: React.FC = () => {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => alert('Edit functionality not implemented yet')}
+                onClick={() => onEdit?.(user)}
               >
                 Edit
               </Button>

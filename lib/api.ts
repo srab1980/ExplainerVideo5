@@ -165,7 +165,7 @@ export const userApi = {
   getAll: () => api.get('/api/users'),
   getById: (id: string) => api.get(`/api/users/${id}`),
   create: <T = unknown>(user: T) => api.post('/api/users', user),
-  update: <T = unknown>(id: string, updates: T) => api.put(`/api/users/${id}`, updates),
+  update: <T = unknown>(id: string, updates: T) => api.patch(`/api/users/${id}`, updates),
   delete: (id: string) => api.delete(`/api/users/${id}`),
 };
 
@@ -173,7 +173,7 @@ export const taskApi = {
   getAll: (params?: Record<string, unknown>) => api.get('/api/tasks', { params }),
   getById: (id: string) => api.get(`/api/tasks/${id}`),
   create: <T = unknown>(task: T) => api.post('/api/tasks', task),
-  update: <T = unknown>(id: string, updates: T) => api.put(`/api/tasks/${id}`, updates),
+  update: <T = unknown>(id: string, updates: T) => api.patch(`/api/tasks/${id}`, updates),
   delete: (id: string) => api.delete(`/api/tasks/${id}`),
 };
 
