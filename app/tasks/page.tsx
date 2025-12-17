@@ -7,8 +7,10 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { TaskList } from '@/components/TaskList';
 import { TaskForm } from '@/components/TaskForm';
 import { TaskFilters, TaskFilterState } from '@/components/TaskFilters';
+import { Modal } from '@/components/Modal';
 import { useTaskStore } from '@/store';
 import { filterAndSortTasks, DEFAULT_FILTERS } from '@/lib/taskFilters';
+import { Task } from '@/types';
 
 function TaskListSkeleton() {
   return (
@@ -27,6 +29,8 @@ export default function TasksPage() {
   const { tasks, loading } = useTaskStore();
   const [showForm, setShowForm] = useState(false);
   const [filters, setFilters] = useState<TaskFilterState>(DEFAULT_FILTERS);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   // Apply filters and sorting
   const filteredTasks = useMemo(() => {
@@ -39,6 +43,21 @@ export default function TasksPage() {
 
   const handleClearFilters = () => {
     setFilters(DEFAULT_FILTERS);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+    setEditingTask(null);
+  };
+
+  const handleEditSuccess = () => {
+    setIsEditModalOpen(false);
+    setEditingTask(null);
   };
 
   return (
@@ -84,10 +103,26 @@ export default function TasksPage() {
           </div>
         ) : (
           <Suspense fallback={<TaskListSkeleton />}>
-            <TaskList tasks={filteredTasks} />
+            <TaskList 
+              tasks={filteredTasks} 
+              onTaskEdit={handleEditTask}
+            />
           </Suspense>
         )}
       </Card>
+
+      {/* Edit Task Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={handleEditModalClose}
+        title="Edit Task"
+      >
+        <TaskForm
+          initialData={editingTask || undefined}
+          onSuccess={handleEditSuccess}
+          onCancel={handleEditModalClose}
+        />
+      </Modal>
     </div>
   );
 }
