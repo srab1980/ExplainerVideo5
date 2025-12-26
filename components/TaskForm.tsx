@@ -9,10 +9,11 @@ import { api } from '@/lib/api';
 
 interface TaskFormProps {
   onSuccess?: () => void;
+  onCancel?: () => void;
   initialData?: Partial<Task>;
 }
 
-export const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, initialData }) => {
+export const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel, initialData }) => {
   const { addTask } = useTaskStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,28 +44,44 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, initialData }) =>
 
       // Create task data
       const taskData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        priority: formData.priority,
+        assigneeId: formData.assigneeId || undefined,
         dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : undefined,
       };
 
-      // Try to create via API first, fallback to local state
-      try {
-        const response = await api.post<Task>('/api/tasks', taskData);
+      if (initialData?.id) {
+        // Update existing task
+        const response = await api.patch<Task>(`/api/tasks/${initialData.id}`, taskData);
         if (response.success && response.data) {
           addTask(response.data);
         } else {
-          throw new Error(response.error || 'Failed to create task');
-                }
-              } catch {
-                // Fallback to local task creation if API fails
-                const newTask: Task = {
-                  id: Date.now().toString(),
-                  ...taskData as Omit<Task, 'id' | 'status' | 'createdAt' | 'updatedAt'>,
-          status: 'pending',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        addTask(newTask);
+          throw new Error(response.error || 'Failed to update task');
+        }
+      } else {
+        // Create new task
+        try {
+          const response = await api.post<Task>('/api/tasks', taskData);
+          if (response.success && response.data) {
+            addTask(response.data);
+          } else {
+            throw new Error(response.error || 'Failed to create task');
+          }
+        } catch {
+          // Fallback to local task creation if API fails
+          const newTask: Task = {
+            id: Date.now().toString(),
+            title: taskData.title,
+            description: taskData.description,
+            priority: taskData.priority,
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            dueDate: taskData.dueDate,
+          };
+          addTask(newTask);
+        }
       }
 
       // Reset form
@@ -78,7 +95,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, initialData }) =>
 
       onSuccess?.();
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred while creating the task';
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred while saving the task';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -146,21 +163,23 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, initialData }) =>
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onSuccess}
-          disabled={loading}
-        >
-          Cancel
-        </Button>
+        {onCancel && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+        )}
         <Button
           type="submit"
           variant="primary"
           loading={loading}
           disabled={!formData.title.trim()}
         >
-          {initialData ? 'Update Task' : 'Create Task'}
+          {initialData?.id ? 'Update Task' : 'Create Task'}
         </Button>
       </div>
     </form>
