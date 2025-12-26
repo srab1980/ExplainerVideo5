@@ -41,7 +41,6 @@ export function Toast({ id, message, type, duration = 5000, onClose }: ToastProp
       initial={{ opacity: 0, y: -50, scale: 0.3 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
-      // @ts-expect-error - framer-motion types issue with className
       className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-white ${typeStyles[type]} min-w-[300px] max-w-md`}
     >
       <span className="text-xl font-bold">{typeIcons[type]}</span>
