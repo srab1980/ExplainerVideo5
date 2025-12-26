@@ -27,7 +27,9 @@ export const Button: React.FC<ButtonProps> = ({
     lg: 'px-6 py-3 text-base',
   };
 
-  const classes = `${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`;
+  const classes = `${baseClasses} ${variants[variant]} ${sizes[size]} ${
+    disabled || loading ? 'opacity-50' : ''
+  } ${className}`;
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (disabled || loading) return;
