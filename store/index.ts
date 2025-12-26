@@ -136,8 +136,8 @@ export const useTaskStore = () => {
   const setError = useAppStore((state) => state.setError);
   const clearError = useAppStore((state) => state.clearError);
   
-  const completedTasks = useAppStore((state) => state.getCompletedTasks());
-  const pendingTasks = useAppStore((state) => state.getPendingTasks());
+  const completedTasks = tasks.filter((task) => task.status === 'completed');
+  const pendingTasks = tasks.filter((task) => task.status === 'pending');
   
   return {
     tasks,

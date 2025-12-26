@@ -32,7 +32,7 @@ describe('ErrorBoundary', () => {
     );
     
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    expect(screen.getByText('We apologize for the inconvenience')).toBeInTheDocument();
+    expect(screen.getByText(/We apologize for the inconvenience/)).toBeInTheDocument();
     
     consoleSpy.mockRestore();
   });
